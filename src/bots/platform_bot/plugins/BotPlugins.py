@@ -1,17 +1,17 @@
 from dataclasses import dataclass, field
 
+#? bot-engine
 from bot_engine.bot.BotConfigs import BotPlugins
+from bots.trading_bot.handlers.BotHandlers import BotHandlers
 
-#? engine customization
-from bots.platform_bot.handlers.UserDialogs import UserDialogs
-from bots.platform_bot.handlers.AdminDialogs import AdminDialogs
 
 @dataclass
 class MyBotPlugins(BotPlugins):
+    def set_handlers(self, handlers: BotHandlers):
+        handlers.set_handlers()
+        print(f"🟢 Bot handlers set!")
+        
 
-    def set_bot_dialogs(self):
-        """ Prepares user and admin dialogs """
-        UserDialogs(self.bot, self.dialogGenerator, self.languages).create_dialogs()
-        AdminDialogs(self.bot, self.dialogGenerator, self.languages).create_dialogs()
+
 
 

@@ -4,8 +4,8 @@ from dataclasses import dataclass
 class BotCommands:
     start: str = "start"
     learn: str = "learn"
-    ask: str = "ask"
     prices: str = "prices"
+    ask: str = "ask"
     about: str = "about"
     languages: str = "languages"
     

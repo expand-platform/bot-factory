@@ -65,6 +65,16 @@ class Handlers:
         """ reusable method for creating handlers with specific access level """
         pass
 
+    def send_message_reply(self, 
+        messages: str | list[str],
+        for_command: str,
+        access_level: list[AccessLevel] = [AccessLevel.USER, AccessLevel.ADMIN, AccessLevel.SUPER_ADMIN] 
+        ):
+        @self._bot.message_handler(commands=[for_command], access_level=access_level)
+        def handle_start(message: Message):
+            self.bot._send_message(chat_id=message.chat.id, messages=messages)
+
+
     def slash_command_reply(self, 
             message: Message, 
             command_name: str, 
