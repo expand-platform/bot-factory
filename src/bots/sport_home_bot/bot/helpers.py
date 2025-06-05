@@ -9,6 +9,8 @@ from bots.sport_home_bot.bot.dataclass import FIELDS, FieldConfig
 from apscheduler.schedulers.background import BackgroundScheduler
 from os import environ
 
+from data.constants import ENVIRONMENT
+
 
 class Helpers:
     def __init__(self, bot: TeleBot):
@@ -100,7 +102,8 @@ class Helpers:
         scheduler.remove_all_jobs()
 
         #? on server we substract 3 hours
-        if self.ENVIRONMENT == "PRODUCTION":
+        if self.ENVIRONMENT == ENVIRONMENT.production:
+            #! Вынести в отдельный метод
             if hour >= 3:
                 hour -= 3
             else:
@@ -111,10 +114,10 @@ class Helpers:
                 hour = 24 + (hour - 3)
             scheduler.add_job(self.update_products_daily, 'cron', hour=hour, minute=minute) 
 
-        elif self.ENVIRONMENT == "DEVELOPMENT":
+        else:
             scheduler.add_job(self.update_products_daily, 'cron', hour=hour, minute=minute) 
         
-        #? print(self.scheduler.get_jobs())
+        #? print(scheduler.get_jobs())
         print(f"🟢 Products check will be started at {hour}:{minute}")
 
 
