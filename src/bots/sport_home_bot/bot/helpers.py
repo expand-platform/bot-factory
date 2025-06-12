@@ -1,13 +1,14 @@
-from bots.sport_home_bot.database.mongodb import Database
+from apscheduler.schedulers.background import BackgroundScheduler
+from os import environ
+from time import sleep
+
 from telebot import TeleBot
 from telebot.types import Message
 
+from bots.sport_home_bot.database.mongodb import Database
 from bots.sport_home_bot.bot.messages import messages
 from bots.sport_home_bot.parser.zelart_parser import PrestaShopScraper
 from bots.sport_home_bot.bot.dataclass import FIELDS, FieldConfig
-
-from apscheduler.schedulers.background import BackgroundScheduler
-from os import environ
 
 from data.constants import ENVIRONMENT
 
@@ -26,6 +27,7 @@ class Helpers:
         for user in users:
             try:
                 self.bot.send_message(user["chat_id"], message)
+                sleep(1.2)
             except Exception as e:
                 print(f"Error sending message to user {user['chat_id']}: {e}")
 
@@ -44,8 +46,7 @@ class Helpers:
         for product_from_database in products:
             link = product_from_database["url"]
             product_from_parser = parser.parse_product(link)
-            # print("🐍 link:", link)
-            # print("🐍 product_from_parser",product_from_parser)
+            #? print("🐍 link:", link)
 
             #? when product is no longer exists on the website,
             #? remove it from db
@@ -55,7 +56,6 @@ class Helpers:
                 self.notify_users(messages.product_was_removed.format(link))
                 all_products_change_status = True
                 continue
-
 
             product_change_status = False
             reply_string = messages.scheduler_parse_string_start.format(product_from_parser["title"], link)

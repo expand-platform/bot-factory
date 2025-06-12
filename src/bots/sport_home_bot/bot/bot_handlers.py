@@ -115,9 +115,9 @@ class Bot:
                     self.bot.send_message(message.from_user.id, self.messages.add_product_second_step_fail)
         add_product_command_chain()
 
+
         def set_time_command_chain():
             """ sets time for checking products """
-
             #? /time
             @self.bot.message_handler(commands=[bot_commands.set_time.name])
             def set_time(message: Message):
@@ -143,9 +143,9 @@ class Bot:
                     self.bot.send_message(message.chat.id, self.messages.set_time_second_step_success.format(hour, minutes))
         set_time_command_chain()
         
+
         def remove_product_command_chain():
             """ removes product from DB """
-
             #? /remove
             @self.bot.message_handler(commands=[bot_commands.remove_product.name])
             def remove_product(message: Message):
