@@ -26,7 +26,6 @@ class AccessLevelFilter(AdvancedCustomFilter):
 
         #? inline keyboard reply filters bot itself
         if not hasattr(message, "chat"):
-            print(f"reply using inline keyboard from user { message.message.from_user.id }")
             active_user = self.database.get_active_user(message)
             message = message.message
         else: 
@@ -37,4 +36,6 @@ class AccessLevelFilter(AdvancedCustomFilter):
         self.languages.set_active_language(active_user.language)
 
         access_level_values = [level.value for level in access_level]
-        return user_access_level in access_level_values 
+        return user_access_level in access_level_values
+
+

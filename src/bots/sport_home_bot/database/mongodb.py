@@ -1,9 +1,8 @@
-import pymongo
-import os
 from dotenv import load_dotenv, dotenv_values
 from pymongo.collection import Collection, ObjectId
 from pymongo.mongo_client import MongoClient
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Union
 
 from config.env import DATABASE_TOKEN
 
@@ -26,7 +25,7 @@ product_document = ProductDocument()
 
 #! We'll need to use bot_engine Database & MongoDB classes later
 class Database():
-    def __init__(self):
+    def __init__(self) -> None:
         self.client = MongoClient(DATABASE_TOKEN)
         self.db = self.client[BOT_CONFIGS.database_name]
         self.users_collection = self.db[BOT_CONFIGS.users_collection]
@@ -34,7 +33,7 @@ class Database():
         self.config_collection = self.db["config"]
 
 
-    def insert_product(self, product):
+    def insert_product(self, product: Dict[str, Any]) -> None:
         try:
             status = self.products_collection.find_one({"id": product["id"]})
             if status:
@@ -47,19 +46,19 @@ class Database():
             print(f"An error occurred: {e}")
 
         
-    def get_products(self) -> list:
+    def get_products(self) -> List[Dict[str, Any]]:
         try:
-            products = self.products_collection.find({})
+            products = list(self.products_collection.find({}))
             return products
         except Exception as e:
             print(f"An error occurred: {e}")
-            return None
-        
-    def get_products_count(self) -> list:
-        return len(list(self.get_products()))
+            return []
+
+    def get_products_count(self) -> int:
+        return len(self.get_products())
 
 
-    def insert_user(self, user):
+    def insert_user(self, user: Dict[str, Any]) -> None:
         try:
             status = self.users_collection.find_one({"chat_id": user["chat_id"]})
             if status:
@@ -71,19 +70,27 @@ class Database():
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    def find_every_user(self):
+    
+    def get_user_by_id(self, user_id: Union[int, str]) -> Optional[Dict[str, Any]]:
         try:
-            users = self.users_collection.find()
-            return users
+            return self.users_collection.find_one({"chat_id": user_id})
         except Exception as e:
             print(f"An error occurred: {e}")
             return None
 
-    def find(self, key: str, value: str | int | bool | list) -> dict | None:
+    def get_users(self) -> List[Dict[str, Any]]:
+        try:
+            users = list(self.users_collection.find())
+            return users
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return []
+
+    def find(self, key: str, value: Union[str, int, bool, list]) -> Optional[Dict[str, Any]]:
         return self.products_collection.find_one({key: value})
         
 
-    def update(self, key, value, field_name, new_value):
+    def update(self, key: str, value: Any, field_name: str, new_value: Any) -> None:
         try:
             self.products_collection.update_one({key: value}, {"$set": {field_name: new_value}})
             print(f"Updated {field_name} to {new_value} for {key}: {value}")
@@ -91,13 +98,14 @@ class Database():
             print(f"An error occurred: {e}")
 
 
-    def update_config(self, key: str = "", new_value: str | int | bool = ""):
+    def update_config(self, key: str = "", new_value: Union[str, int, bool] = "") -> None:
         document = self.config_collection.find_one({})
 
         if document:
             document_id = document[config_document.id]
         else:
             print(f"🔴 No config document found!")
+            return
         
         update_data = {'$set': {key: new_value}}
         result = self.config_collection.update_one({'_id': ObjectId(document_id)}, update_data)
@@ -112,7 +120,7 @@ class Database():
             print("🔴 Error: no such _id or document in config collection")
 
 
-    def get_parse_time(self) -> list[int]:
+    def get_parse_time(self) -> List[int]:
         document = self.config_collection.find_one({})
 
         parse_time = [19, 0]
@@ -126,7 +134,6 @@ class Database():
 
         else:
             parse_time = document[config_document.parse_time]
-            #? print("🐍 parse_time: ",parse_time)
 
             #? set default time
             for time in parse_time:
@@ -143,3 +150,5 @@ class Database():
             print(f"🟢 product {id} deleted from DB!")
         else:
             print(f"🟡 Product with {id} not found in DB!")
+
+

@@ -29,8 +29,6 @@ from bot_engine.enums.Generator import *
 
 #? own
 from bots.trading_bot.config.env import SUPER_ADMIN_ID, ADMIN_IDS
-# from bots.trading_bot.config.commands import BOT_COMMANDS
-
 
 
 @dataclass

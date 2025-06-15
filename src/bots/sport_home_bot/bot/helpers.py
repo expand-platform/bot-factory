@@ -1,6 +1,7 @@
-from apscheduler.schedulers.background import BackgroundScheduler
 from os import environ
 from time import sleep
+
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from telebot import TeleBot
 from telebot.types import Message
@@ -8,31 +9,32 @@ from telebot.types import Message
 from bots.sport_home_bot.database.mongodb import Database
 from bots.sport_home_bot.bot.messages import messages
 from bots.sport_home_bot.parser.zelart_parser import PrestaShopScraper
-from bots.sport_home_bot.bot.dataclass import FIELDS, FieldConfig
+from bots.sport_home_bot.bot.dataclass import FIELDS
 
 from data.constants import ENVIRONMENT
 
+SLEEP_TIME = 1.2  # seconds
 
 class Helpers:
-    def __init__(self, bot: TeleBot):
-        self.db = Database()
-        self.bot = bot
+    def __init__(self, bot: TeleBot, database: Database, scheduler: BackgroundScheduler):
         self.ENVIRONMENT: str = environ["ENVIRONMENT"]
+        self.db = database
+        self.bot = bot
+        self.scheduler = scheduler
 
     
     #! убрать костыль с юзерами
     def notify_users(self, message: str) -> None:
-        users = self.db.find_every_user()
+        users = self.db.get_users()
 
         for user in users:
-            try:
+            try: 
                 self.bot.send_message(user["chat_id"], message)
-                sleep(1.2)
+                sleep(SLEEP_TIME)
             except Exception as e:
                 print(f"Error sending message to user {user['chat_id']}: {e}")
 
  
-    # ! разбить стену кода на функции
     def update_products_daily(self):
         """ updates products in DB and sends message to users """
         self.notify_users(messages.scheduler_start_parsing)
@@ -51,59 +53,75 @@ class Helpers:
             #? when product is no longer exists on the website,
             #? remove it from db
             if isinstance(product_from_parser, str):
-                removed_product = self.db.find(key="url", value=link)
-                self.db.remove_product(id=removed_product["id"])
-                self.notify_users(messages.product_was_removed.format(link))
+                self._handle_removed_product(link)
                 all_products_change_status = True
                 continue
 
-            product_change_status = False
-            reply_string = messages.scheduler_parse_string_start.format(product_from_parser["title"], link)
-            
-            for product_key in product_from_parser:
-                if product_key == "priceCur" or product_key == "priceWithDiscount" or product_key == "priceSrp" or product_key == "isHidden":
-                    if product_from_parser[product_key] != product_from_database[product_key]:
-                        print("change happened")
-                        product_change_status = True
-                        all_products_change_status = True
+            product_change_status = self._handle_product_change(product_from_database, product_from_parser, link)
+            if product_change_status:
+                all_products_change_status = True
 
-                        field = FIELDS.get(product_key)
-
-                        if not field:
-                            continue
-
-                        key = field.display_name
-                        key_value_database = field.format_func(product_from_database[product_key])
-                        key_value_parser = field.format_func(product_from_parser[product_key])
-
-                        if field.unit and product_key != "isHidden":
-                            key_value_database += f" {field.unit}"
-                            key_value_parser += f" {field.unit}"
+        self._notify_final_status(all_products_change_status)
 
 
-                        reply_string += messages.scheduler_parse_string_add.format(key, key_value_database, key_value_parser)
-                        self.db.update("url", link, product_key, product_from_parser[product_key])
-
-            if product_change_status == False:
-                print(f"➖ product has not changed")
-            
-            else:
-                print(f"➕ product has changed")
-                self.notify_users(reply_string)
+    def _handle_removed_product(self, link: str) -> None:
+        removed_product = self.db.find(key="url", value=link)
         
-        #! Временное решение, надо будет сделать контроль рассылки
-        if all_products_change_status == False:
+        if removed_product:
+            self.db.remove_product(id=removed_product["id"])
+        
+        self.notify_users(messages.product_was_removed.format(link))
+
+
+    def _handle_product_change(self, product_from_database, product_from_parser, link: str) -> bool:
+        product_change_status = False
+        reply_string = messages.scheduler_parse_string_start.format(product_from_parser["title"], link)
+        
+        for product_key in product_from_parser:
+            if product_key in ("priceCur", "priceWithDiscount", "priceSrp", "isHidden"):
+                if product_from_parser[product_key] != product_from_database[product_key]:
+                    print("change happened")
+                    product_change_status = True
+
+                    field = FIELDS.get(product_key)
+
+                    if not field:
+                        continue
+
+                    key = field.display_name
+                    key_value_database = field.format_func(product_from_database[product_key])
+                    key_value_parser = field.format_func(product_from_parser[product_key])
+
+                    if field.unit and product_key != "isHidden":
+                        key_value_database += f" {field.unit}"
+                        key_value_parser += f" {field.unit}"
+
+
+                    reply_string += messages.scheduler_parse_string_add.format(key, key_value_database, key_value_parser)
+                    self.db.update("url", link, product_key, product_from_parser[product_key])
+
+
+        if product_change_status:
+            print(f"➕ product has changed")
+            self.notify_users(reply_string)
+        else:
+            print(f"➖ product has not changed")
+        
+        return product_change_status
+
+
+    def _notify_final_status(self, all_products_change_status: bool) -> None:
+        if not all_products_change_status:
             self.notify_users(messages.scheduler_parse_string_no_changes)
         else:
             self.notify_users(messages.parse_final)
 
         
-    def schedule_parse_time(self, scheduler: BackgroundScheduler, hour: int = 19, minute: int = 0) -> None:
-        scheduler.remove_all_jobs()
+    def schedule_parse_time(self, hour: int = 19, minute: int = 0) -> None:
+        self.scheduler.remove_all_jobs()
 
         #? on server we substract 3 hours
         if self.ENVIRONMENT == ENVIRONMENT.production:
-            #! Вынести в отдельный метод
             if hour >= 3:
                 hour -= 3
             else:
@@ -112,10 +130,10 @@ class Helpers:
                 #? -2 = 22
                 #? -3 = 21
                 hour = 24 + (hour - 3)
-            scheduler.add_job(self.update_products_daily, 'cron', hour=hour, minute=minute) 
+            self.scheduler.add_job(self.update_products_daily, 'cron', hour=hour, minute=minute) 
 
         else:
-            scheduler.add_job(self.update_products_daily, 'cron', hour=hour, minute=minute) 
+            self.scheduler.add_job(self.update_products_daily, 'cron', hour=hour, minute=minute) 
         
         #? print(scheduler.get_jobs())
         print(f"🟢 Products check will be started at {hour}:{minute}")
