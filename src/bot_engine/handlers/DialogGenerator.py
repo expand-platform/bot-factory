@@ -50,24 +50,24 @@ class DialogGenerator:
         state: StateContext | None = None, 
         inline_keyboard: str | None = None, 
         reply_keyboard: str | None = None, 
-    ) -> HandlerType:
+    ) -> UserAction:
         """ defines one of 4 handler_type: slash_command, state, inline or reply keyboard """
-        handler_type = HandlerType.SLASH_COMMAND
+        handler_type = UserAction.SLASH_COMMAND
         
         if state:
-            return HandlerType.STATE
+            return UserAction.STATE
 
         elif inline_keyboard:
-            return HandlerType.INLINE_KEYBOARD
+            return UserAction.INLINE_KEYBOARD
         
         elif reply_keyboard:
-            return HandlerType.REPLY_KEYBOARD
+            return UserAction.REPLY_KEYBOARD
         
         return handler_type
 
 
-    def generate_inline_button_callback_prefix(self, handler_type: HandlerType, how_much: int = 12) -> str | None:
-        if handler_type == HandlerType.INLINE_KEYBOARD:
+    def generate_inline_button_callback_prefix(self, handler_type: UserAction, how_much: int = 12) -> str | None:
+        if handler_type == UserAction.INLINE_KEYBOARD:
             """ create a random string for inline buttons callback prefix """
             return ''.join(choices(ascii_lowercase, k=how_much))
         return None
@@ -133,7 +133,7 @@ class DialogGenerator:
             call_data = None
             call_id = None
             
-            if handler_type == HandlerType.INLINE_KEYBOARD:
+            if handler_type == UserAction.INLINE_KEYBOARD:
                 call_data = message.data
                 call_id = message.id
                 print("🐍 call_data: ", call_data)
@@ -213,7 +213,7 @@ class DialogGenerator:
             # ? Messages and keyboards
             if first_message:
                 # when keyboard, send signal for callback_query
-                if handler_type == HandlerType.INLINE_KEYBOARD:
+                if handler_type == UserAction.INLINE_KEYBOARD:
                     self.bot._bot.answer_callback_query(
                         callback_query_id=call_id,
                         text="",
@@ -250,7 +250,7 @@ class DialogGenerator:
 
             if last_message:
                 # when keyboard, send signal for callback_query
-                if handler_type == HandlerType.INLINE_KEYBOARD:
+                if handler_type == UserAction.INLINE_KEYBOARD:
                     self.bot._bot.answer_callback_query(
                         callback_query_id=call_id,
                         text="",
@@ -296,18 +296,18 @@ class DialogGenerator:
         active_state: Optional[StateContext] = None, 
         inline_button_prefix: Optional[str] = None,
 
-        handler_type: Optional[HandlerType] = HandlerType.SLASH_COMMAND, 
+        handler_type: Optional[UserAction] = UserAction.SLASH_COMMAND, 
         access_level: Optional[list[AccessLevel]] = [AccessLevel.USER, AccessLevel.ADMIN, AccessLevel.SUPER_ADMIN] 
     ) -> None:
         """ sets listener for all types of HandlerType """
-        if handler_type == HandlerType.SLASH_COMMAND:
+        if handler_type == UserAction.SLASH_COMMAND:
             self.bot._bot.register_message_handler(
                 callback=handler_function,
                 access_level=access_level,
                 commands=[slash_command],
             )
 
-        elif handler_type == HandlerType.STATE:
+        elif handler_type == UserAction.STATE:
             self.bot._bot.register_message_handler(
                 callback=handler_function,
                 access_level=access_level,
@@ -315,7 +315,7 @@ class DialogGenerator:
             )
 
 
-        elif handler_type == HandlerType.INLINE_KEYBOARD:
+        elif handler_type == UserAction.INLINE_KEYBOARD:
             self.bot._bot.register_callback_query_handler(
                 callback=handler_function,
                 access_level=access_level,
@@ -325,7 +325,7 @@ class DialogGenerator:
             )
 
 
-        elif handler_type == HandlerType.REPLY_KEYBOARD:
+        elif handler_type == UserAction.REPLY_KEYBOARD:
             pass
             
 
@@ -337,7 +337,7 @@ class DialogGenerator:
 
         #? data for message generation
         active_user: User | None = None, 
-        handler_type = HandlerType.SLASH_COMMAND, 
+        handler_type = UserAction.SLASH_COMMAND, 
         command_name: str | None = None,
         
         custom_messages: Optional[list[str] | str] = None,
@@ -347,7 +347,7 @@ class DialogGenerator:
         #? create message based on handler_type        
         message_text = f"{active_user.first_name} зашёл в /{command_name}"
 
-        if handler_type == HandlerType.INLINE_KEYBOARD:
+        if handler_type == UserAction.INLINE_KEYBOARD:
             message_text = f"{active_user.first_name} нажал на кнопку /{command_name}"
 
         if custom_messages:
@@ -368,9 +368,9 @@ class DialogGenerator:
 
     # * HELPERS
     #! Добавить параметры для работы с ADMINS и SUPER_ADMIN
-    def notify_super_admin(self, active_user: dict, command_name: str, handler_type: HandlerType, messages: list[str] | str = None):
+    def notify_super_admin(self, active_user: dict, command_name: str, handler_type: UserAction, messages: list[str] | str = None):
         #! Нужно добавить проверку на _ в любой строке, т.к. это ломает функционал...
-        if handler_type == HandlerType.SLASH_COMMAND:
+        if handler_type == UserAction.SLASH_COMMAND:
             if active_user.user_id != SUPER_ADMIN_ID:
                 self.bot.tell_super_admin(messages=messages)
 

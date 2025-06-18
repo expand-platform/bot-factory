@@ -39,7 +39,7 @@ class DialogGenerator:
     
     def make_dialog(self,
         #? handler
-        handler_type: Optional[HandlerType] = HandlerType.STATE,
+        handler_type: Optional[UserAction] = UserAction.STATE,
         access_level: Optional[list[AccessLevel]] = [AccessLevel.USER, AccessLevel.ADMIN, AccessLevel.SUPER_ADMIN],
 
         #? commands
@@ -82,7 +82,7 @@ class DialogGenerator:
         
 
     def create_handler(self, 
-            handler_type: HandlerType,
+            handler_type: UserAction,
             message_text: str, 
             inline_button_texts: Optional[str | list[str]], #? or pick them from a DB 
             # prefix: str, #? unique buttons prefix
@@ -159,15 +159,15 @@ class DialogGenerator:
         inline_buttons_prefix: Optional[str] = None,
         inline_buttons_property: Optional[str] = None,
         access_level: list[AccessLevel] =[AccessLevel.USER, AccessLevel.ADMIN, AccessLevel.SUPER_ADMIN],
-        handler_type: Optional[HandlerType] = HandlerType.STATE,
+        handler_type: Optional[UserAction] = UserAction.STATE,
     ):
-        if handler_type == HandlerType.SLASH_COMMAND:
+        if handler_type == UserAction.SLASH_COMMAND:
             self.set_slash_command_listener(handler_function, access_level, command_name=command_name)
         
-        elif handler_type == HandlerType.STATE:
+        elif handler_type == UserAction.STATE:
             self.set_state_listener(handler_function, access_level, active_state=active_state)
 
-        elif handler_type == HandlerType.INLINE_KEYBOARD:
+        elif handler_type == UserAction.INLINE_KEYBOARD:
             self.set_inline_buttons_listener(handler_function, access_level, prefix_with_property=f"{inline_buttons_prefix}:{inline_buttons_property}")
 
         else: 
@@ -504,21 +504,21 @@ class DialogGenerator:
 
     def set_handler_response_type(self, respond_to, slash_command_name, access_level, active_state, create_dialog) -> None:
         """ sets the type of message handler (slash command / inline keyboard / reply keyboard) """
-        if respond_to == HandlerType.SLASH_COMMAND:
+        if respond_to == UserAction.SLASH_COMMAND:
             self.bot._bot.register_message_handler(
                 callback=create_dialog,
                 commands=[slash_command_name],
                 access_level=access_level,
             )
 
-        if respond_to == HandlerType.STATE:
+        if respond_to == UserAction.STATE:
             self.bot._bot.register_message_handler(
                 callback=create_dialog,
                 state=active_state,
                 access_level=access_level,
             )
 
-        if respond_to == HandlerType.REPLY_KEYBOARD:
+        if respond_to == UserAction.REPLY_KEYBOARD:
             pass
             
 

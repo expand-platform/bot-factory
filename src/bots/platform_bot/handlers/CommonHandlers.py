@@ -19,7 +19,6 @@ from bots.platform_bot.config.buttons import BOT_BUTTONS
 
 #? enums
 from bots.platform_bot.config.CallbackProperties import CallbackProperties
-
 from bots.platform_bot.handlers.BotHandlers import BotHandlers
 
 
@@ -29,33 +28,33 @@ class CommonHandlers(BotHandlers):
     def set_handlers(self, access_level=[AccessLevel.USER, AccessLevel.ADMIN, AccessLevel.SUPER_ADMIN]):
         
         #? /start
-        self.send_message_reply(
-            for_command=BOT_COMMANDS.start,
+        self.slash_command(
+            command=BOT_COMMANDS.start,
             messages=self._messages[BOT_COMMANDS.start],
         )
         
-        #? /learn
-        self.send_message_reply(
-            for_command=BOT_COMMANDS.learn,
-            messages=self._messages[BOT_COMMANDS.learn],
-        )
-        
         #? /prices
-        self.send_message_reply(
-            for_command=BOT_COMMANDS.prices,
+        self.slash_command(
+            command=BOT_COMMANDS.prices,
             messages=self._messages[BOT_COMMANDS.prices],
         )
 
         #? /ask
-        self.send_message_reply(
-            for_command=BOT_COMMANDS.ask,
+        self.slash_command(
+            command=BOT_COMMANDS.ask,
             messages=self._messages[BOT_COMMANDS.ask],
         )
 
         #? /about
-        self.send_message_reply(
-            for_command=BOT_COMMANDS.about,
+        self.slash_command(
+            command=BOT_COMMANDS.about,
             messages=self._messages[BOT_COMMANDS.about],
+        )
+        
+        #? /help
+        self.slash_command(
+            command=BOT_COMMANDS.help,
+            messages=self._messages[BOT_COMMANDS.help],
         )
 
 

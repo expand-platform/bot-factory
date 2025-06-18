@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class BotCommands:
     start: str = "start"
-    learn: str = "learn"
-    prices: str = "prices"
     ask: str = "ask"
+    prices: str = "prices"
     about: str = "about"
-    languages: str = "languages"
+    help: str = "help"
+
     
 BOT_COMMANDS = BotCommands()
