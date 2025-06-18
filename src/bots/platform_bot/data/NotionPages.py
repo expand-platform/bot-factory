@@ -20,7 +20,7 @@ class NotionPages:
     
     """ tasks & projects """
     tasks: str = f"{DOMAIN}tasks"
-    projects: str = f"{DOMAIN}projects"
+    projects: str = f"{DOMAIN}project"
     
 
 NOTION_PAGE = NotionPages()
