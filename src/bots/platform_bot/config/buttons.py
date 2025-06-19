@@ -9,5 +9,4 @@ class BotButtons:
 class CallbackProperties:
     language: str = "language"
 
-
 BOT_BUTTONS = BotButtons()
