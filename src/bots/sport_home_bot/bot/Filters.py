@@ -15,11 +15,11 @@ class SimpleAccessLevelFilter(AdvancedCustomFilter):
         self.db = database
 
 
-    def check(self, message: Message, access_levels: list[AccessLevel]):
+    def check(self, message: Message, access_levels: list[str]):
         user_id = message.from_user.id
         user = self.db.get_user_by_id(user_id)
         
         if not user:
             return False
         
-        return AccessLevel(user[access_level_key]) in access_levels
+        return user[access_level_key] in access_levels

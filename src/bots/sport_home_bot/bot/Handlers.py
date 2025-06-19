@@ -35,6 +35,7 @@ class Handlers:
 
         self.access_levels = [AccessLevel.USER, AccessLevel.ADMIN, AccessLevel.SUPER_ADMIN]
 
+
     def setup_command_handlers(self):
         self._setup_start_handler()
         self._add_product_command_chain()
@@ -124,7 +125,6 @@ class Handlers:
 
 
     def _remove_product_command_chain(self):
-        access_levels = [AccessLevel.USER, AccessLevel.ADMIN, AccessLevel.SUPER_ADMIN]
         @self.bot.message_handler(commands=[bot_commands.remove_product.name], access_level=self.access_levels)
         def remove_product(message: Message):
             """ first step of removing product """
@@ -149,14 +149,12 @@ class Handlers:
 
 
     def _setup_parse_handler(self):
-        access_levels = [AccessLevel.USER, AccessLevel.ADMIN, AccessLevel.SUPER_ADMIN]
         @self.bot.message_handler(commands=[bot_commands.parse.name], access_level=self.access_levels)
         def parse(message: Message):
             self.helpers.update_products_daily()
 
 
     def _setup_info_handler(self):
-        access_levels = [AccessLevel.USER, AccessLevel.ADMIN, AccessLevel.SUPER_ADMIN]
         @self.bot.message_handler(commands=[bot_commands.info.name], access_level=self.access_levels)
         def get_info(message: Message):
             self.bot.send_message(message.from_user.id, self.messages.info)
@@ -164,7 +162,6 @@ class Handlers:
 
 
     def _setup_menu_handler(self):
-        access_levels = [AccessLevel.USER, AccessLevel.ADMIN, AccessLevel.SUPER_ADMIN]
         @self.bot.message_handler(commands=[bot_commands.menu.name], access_level=self.access_levels)
         def get_help(message: Message):
             self.bot.send_message(message.from_user.id, self.messages.help)
