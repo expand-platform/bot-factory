@@ -17,9 +17,10 @@ RU_LOCALE = Locale(
     command_descriptions = {
         BOT_COMMANDS.start: "Старт",
         BOT_COMMANDS.conditions: "Условия",
-        BOT_COMMANDS.payment: "Сколько заработаю?",
+        BOT_COMMANDS.payment: "Сколько могу заработать?",
+        BOT_COMMANDS.prices: "Дорого ли учиться?",
         BOT_COMMANDS.about: "О платформе EXPAND",     
-        BOT_COMMANDS.info: "Разделы и справка",
+        BOT_COMMANDS.info: "Справка по боту",
     },
 
     button_texts = {
