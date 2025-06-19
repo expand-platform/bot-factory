@@ -4,10 +4,11 @@ from typing import Any
 #? engine
 from bot_engine.languages.Locale import Locale
 from bot_engine.languages.Languages import Languages
-# from bot_engine.dialogs.DialogGenerator import DialogGenerator
 from bot_engine.bot.Bot import Bot
 from bot_engine.database.Database import Database
 
+#? config
+from config.env import DEFAULT_LANGUAGE
 
 
 @dataclass
@@ -37,8 +38,6 @@ class BotPlugins:
         """ Connects MongoDB, prepares cache for users """
         #? Prepare users in cache for further interactions  
         self.db.cache_users()
-        pass
-    
 
     #! Create list of constants of supported API clients
     # def add_api_client(self, client_name: str, client: Any):
@@ -47,7 +46,7 @@ class BotPlugins:
     #     print(f"🟢 API client {client_name} set!")
 
 
-    def set_languages(self, locales: list[Locale], bot_language = "ru"):
+    def set_languages(self, locales: list[Locale], bot_language = DEFAULT_LANGUAGE):
         """ sets locales and active language """
         for locale in locales:
             self.languages.add_locale(locale)

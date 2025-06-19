@@ -10,15 +10,14 @@ from api.api_clients import API_CLIENTS
 
 #? bot engine
 from bot_engine.handlers.Handlers import Handlers
-from bot_engine.enums.User import AccessLevel
+from bot_engine.data.Users import AccessLevel
 from bot_engine.enums.Generator import *
 
 #? constants
-from bots.platform_bot.config.commands import BOT_COMMANDS
-from bots.platform_bot.config.buttons import BOT_BUTTONS
+from bots.platform_bot.config.BotCommands import BOT_COMMANDS
+from bots.platform_bot.config.Buttons import BOT_BUTTONS
 
 #? enums
-from bots.platform_bot.config.CallbackProperties import CallbackProperties
 from bots.platform_bot.handlers.BotHandlers import BotHandlers
 
 

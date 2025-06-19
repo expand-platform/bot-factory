@@ -1,11 +1,10 @@
-#? engine
 from dataclasses import dataclass, field
-
+from typing import Optional
 from psutil import users
-# from bots.trading_bot.config.env import SUPER_ADMIN_ID
-from bot_engine.users.User import User, NewUser
 
-from bot_engine.enums.User import AccessLevel
+#? engine
+from bot_engine.users.User import User, NewUser
+from bot_engine.data.Users import AccessLevel
 
 
 #! 1. Теперь здесь можно создавать переменные ячейки, например
@@ -34,26 +33,19 @@ class Cache:
         
     def get_users_from_cache(self) -> list:
         if len(self._cached_users) > 0:
-            # print(f"🟢 users in cache: { self.cached_users }")
             return self._cached_users
         else:
-            # print(f"❌ no users in cache: { self.cached_users }")
             return []
-    
-    
-    def get_admin_ids(self) -> list:
-        # print(f"admin ids: { self.admin_ids }")
-        return self.admin_ids
     
     
     def find_active_user_in_cache(self, user_id: int) -> User | None:
         print(f"user_id (Cache.find_active_user): { user_id }")
+        
         for user in self._cached_users:
-            # print(f"user: { user }")
             if user.user_id == user_id:
                 print(f"🟢 User {user_id} found in cache")
                 return user
-        # if user is not found
+
         print(f"🔴 User {user_id} isn't found in cache")
         return None
     
@@ -64,17 +56,13 @@ class Cache:
 
         for user in self._cached_users:
             if user.user_id == user_id:
-                # Handle enum conversion if needed
-                if key == "access_level" and isinstance(new_value, str):
-                    new_value = AccessLevel(new_value)
-
                 setattr(user, key, new_value)
 
                 print(f"🍏 Update user: {user_id} updated with '{key}'='{new_value}'")
                 break
                 
 
-    def get_user(self, user_id: int) -> dict:
+    def get_user(self, user_id: int) -> Optional[User]:
         for user in self._cached_users:
             if user.user_id == user_id:
                 return user
@@ -92,9 +80,8 @@ class Cache:
             if user.user_id == user_id:
                 print(f"🟢 user exists in Cache: {user_id}")
                 return True
-            else:
-                print(f"🟡 user doesn't exists in Cache: {user_id}, caching...")
-                return False
+        print(f"🟡 user doesn't exists in Cache: {user_id}, caching...")
+        return False
         
 
     
@@ -109,11 +96,4 @@ class Cache:
     def clean_users(self):
         """ cleans all users, except super_admin """
         self._cached_users = []
-        
-        # for user in self.users:
-        #     if user.user_id == self.SUPER_ADMIN_ID:
-        #         pass
-        #     else:
-        #         self.users.remove(user)
-        
         print(f"Кеш пользователей очищен! 🧹\n{self._cached_users}")

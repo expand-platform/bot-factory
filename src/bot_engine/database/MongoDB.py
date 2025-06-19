@@ -6,7 +6,7 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 
 #? bot engine
-from bot_engine.users.User import NewUser, User
+from bot_engine.users.User import User, NewUser
 
 
 @dataclass

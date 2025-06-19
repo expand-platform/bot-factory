@@ -8,7 +8,7 @@ from bots.trading_bot.config.env import ADMIN_IDS, SUPER_ADMIN_ID
 from bot_engine.users.User import User, UserProfile, NewUser
 from bot_engine.database.MongoDB import MongoDB
 from bot_engine.database.Cache import Cache
-from bot_engine.enums.User import CreateMethod, AccessLevel
+from bot_engine.data.Users import CreateMethod, AccessLevel
 from bot_engine.enums.Database import DatabaseAdapter
 
 
@@ -31,7 +31,7 @@ class Database:
     DATABASE_NAME: str
     SUPER_ADMIN_ID: int
     ADMIN_IDS: list[int] | int
-    USER_IDS: Optional[list[int] | int] = None
+    USER_IDS: Optional[list[int]] = None
 
     adapter: DatabaseAdapter = DatabaseAdapter.MONGODB
     _database: MongoDB = field(init=False)
@@ -55,7 +55,7 @@ class Database:
                 TOKEN=self.TOKEN,
                 DATABASE_NAME=self.DATABASE_NAME,
                 SUPER_ADMIN_ID=self.SUPER_ADMIN_ID,
-            )
+            ) 
         else:
             print("❌CRITICAL: another database adapters is not found")
             pass
@@ -81,36 +81,38 @@ class Database:
             self._cache.cache_user(user)
     
 
-
-    def set_access_level(self, user_id: int) -> AccessLevel:
+    def set_access_level(self, user_id: int) -> str:
         """ sets user access level """
+        access_level = AccessLevel.USER
+        
         if user_id == SUPER_ADMIN_ID:
-            return AccessLevel.SUPER_ADMIN
+            access_level = AccessLevel.SUPER_ADMIN
         
         elif user_id in ADMIN_IDS or user_id == ADMIN_IDS:
-            return AccessLevel.ADMIN
+            access_level = AccessLevel.ADMIN
         
-        if self.USER_IDS:
+        #? in cases when bot is closed from other users  
+        elif self.USER_IDS:
             if user_id in self.USER_IDS or user_id == self.USER_IDS: 
-                return AccessLevel.USER
+                access_level = AccessLevel.USER
             else:
-                return AccessLevel.GUEST
+                access_level = AccessLevel.GUEST
         
-        else:
-            return AccessLevel.USER
-
-
-    def create_user_from_message(self, message: Message) -> User:
-        access_level = self.set_access_level(user_id=message.from_user.id)
-        print("🐍 access_level",access_level)
-        new_user = NewUser(access_level).create_user_from_message(message)
-        print("🐍 new_user",new_user)
-        return new_user
-
+        return access_level
     
-    def create_user_from_database(self, user: dict[str, Any]):
-        access_level = self.set_access_level(user_id=user.get("user_id"))
-        new_user = NewUser(access_level).create_user_from_database(user)
+
+    def create_user(self, message: Optional[Message] = None, database_user: Optional[dict[str, str | int | bool]] = None) -> User:
+        access_level = None
+        new_user = None
+        
+        if message:
+            access_level = self.set_access_level(user_id=message.from_user.id)
+            new_user = NewUser(access_level).create_user(message=message)
+            
+        elif database_user:
+            access_level = self.set_access_level(user_id=database_user.get("user_id"))
+            new_user = NewUser(access_level).create_user(database_user=database_user)
+            
         return new_user
 
 
@@ -121,7 +123,7 @@ class Database:
         # ? if no user, create it from message
         if active_user is None:
             print(f"👀 Wow, there's someone new here..")
-            active_user = self.create_user_from_message(message)
+            active_user = self.create_user(message)
             self._database.add_user(active_user)
             self.cache_user(active_user)
 
@@ -148,12 +150,12 @@ class Database:
 
         self._cache.clean_users()
 
-        db_users = self._database.get_all_users()
-        print(f"✨ Users in Database: { len(db_users) }")
+        database_users = self._database.get_all_users()
+        print(f"✨ Users in Database: { len(database_users) }")
 
-        if db_users:
-            for user in db_users:
-                new_user = self.create_user_from_database(user)
+        if database_users:
+            for database_user in database_users:
+                new_user = self.create_user(database_user=database_user)
                 self._cache.cache_user(new_user)
 
             print(f"👥 Users in cache: { len(self._cache._cached_users) }")
@@ -181,19 +183,21 @@ class Database:
         profile = UserProfile(message)
 
         first_name = profile.get_first_name()
-        print("🐍 update_user_profile ~ first_name",first_name)
         username = profile.get_username()
+        print("🐍 update_user_profile ~ first_name",first_name)
         print("🐍 update_user_profile ~ username",username)
 
         # ? update in DB
         self.update_user(active_user.user_id, "first_name", first_name)
         self.update_user(active_user.user_id, "username", username)
 
+
     # ? cleaning methods
     def clean_users(self):
         """cleans users in MongoDB and Cache"""
         self._database.clean_users()
         self._cache.clean_users()
+
 
     def remove_user(self, user_id: int) -> None:
         self._database.remove_user(user_id)

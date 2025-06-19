@@ -16,7 +16,7 @@ from telebot.states.sync.context import StateContext
 # ? bot engine
 from bots.trading_bot.config.env import SUPER_ADMIN_ID, ADMIN_IDS
 from bot_engine.bot.Bot import Bot
-from bot_engine.users.User import User
+from bot_engine.users.User import NewUser
 from bot_engine.database.MongoDB import MongoDB
 from bot_engine.bot.Bot import Bot
 from bot_engine.database.Cache import Cache
@@ -25,7 +25,7 @@ from bot_engine.languages.Languages import Languages
 
 # ? const / enums
 from bot_engine.const.Bot import *
-from bot_engine.enums.User import *
+from bot_engine.data.Users import *
 from bot_engine.enums.Generator import *
 
 
@@ -336,7 +336,7 @@ class DialogGenerator:
         tell_admins: Optional[bool] = False,
 
         #? data for message generation
-        active_user: User | None = None, 
+        active_user: NewUser | None = None, 
         handler_type = UserAction.SLASH_COMMAND, 
         command_name: str | None = None,
         

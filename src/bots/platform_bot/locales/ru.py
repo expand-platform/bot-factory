@@ -4,13 +4,11 @@ from bot_engine.languages.Locale import Locale
 from bot_engine.data.Users import USER_ACTIONS
 
 #? constats
-from bots.platform_bot.config.commands import BOT_COMMANDS
-from bots.platform_bot.config.buttons import BOT_BUTTONS
+from bots.platform_bot.config.BotCommands import BOT_COMMANDS
+from bots.platform_bot.config.Buttons import BOT_BUTTONS
 
 from bots.platform_bot.data.NotionPages import NOTION_PAGE
 from bots.platform_bot.data.TelegramLinks import TELEGRAM_LINKS
-
-
 
 
 RU_LOCALE = Locale(

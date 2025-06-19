@@ -15,7 +15,7 @@ from binance import Client
 # ? bot engine
 from api.BinanceAPI import BinanceAPI
 from bot_engine.bot.Bot import Bot
-from bot_engine.users.User import User
+from bot_engine.users.User import NewUser
 from bot_engine.database.MongoDB import MongoDB
 from bot_engine.database.Cache import Cache
 from bot_engine.database.Database import Database
@@ -25,7 +25,7 @@ from bot_engine.handlers.HandlerHelpers import HandlerHelpers
 
 # ? const / enums
 from bot_engine.const.Bot import *
-from bot_engine.enums.User import *
+from bot_engine.data.Users import *
 from bot_engine.enums.Generator import *
 
 # ? own
@@ -49,6 +49,7 @@ class Handlers:
     _buttons: dict = field(init=False)
     _Helpers: HandlerHelpers = field(init=False)
 
+
     def __post_init__(self):
         self._bot = self.bot._bot
         self._messages = self.languages.get_messages()
@@ -56,15 +57,18 @@ class Handlers:
 
         self._Helpers = HandlerHelpers(self.bot)
 
+
+    def set_handlers(self):
+        """reusable method for creating handlers with specific access level"""
+        pass
+
+
     def add_api_client(self, client_name: str, client_api: BinanceAPI | Any):
         """sets API to work with"""
         self._api_clients[client_name] = client_api
         print("🐍 self.api_clients", self._api_clients[client_name])
         print(f"🟢 API for {client_name} set!")
 
-    def set_handlers(self):
-        """reusable method for creating handlers with specific access level"""
-        pass
 
     def slash_command(
         self,
@@ -99,7 +103,4 @@ class Handlers:
         api_action: Optional[str] = None,
     ):
         """creates simple message reply for a /slash command using api / database data [optional]"""
-        pass
-
-    def notify_(self):
         pass

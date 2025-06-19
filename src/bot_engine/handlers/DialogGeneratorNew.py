@@ -16,7 +16,7 @@ from telebot.states.sync.context import StateContext
 # ? bot engine
 from bot_engine.bot.Bot import Bot
 from bot_engine.const.Bot import ParseMode
-from bot_engine.users.User import User
+from bot_engine.users.User import NewUser
 from bot_engine.database.MongoDB import MongoDB
 from bot_engine.bot.Bot import Bot
 from bot_engine.database.Cache import Cache
@@ -24,7 +24,7 @@ from bot_engine.database.Database import Database
 from bot_engine.languages.Languages import Languages
 
 # ? const
-from bot_engine.enums.User import AccessLevel
+from bot_engine.data.Users import AccessLevel
 from bot_engine.enums.Generator import *
 
 
@@ -856,7 +856,7 @@ class DialogGenerator:
                 print(f"Bulk editor: users updated successfully 😎")
 
             case "show_user":
-                selected_user: User = Cache().get_user(
+                selected_user: NewUser = Cache().get_user(
                     user_id=data_from_state["user_id"]
                 )
                 print("🐍 selected_user: ", selected_user)

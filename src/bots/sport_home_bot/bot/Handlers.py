@@ -8,7 +8,7 @@ from telebot.custom_filters import StateFilter, IsDigitFilter, TextMatchFilter
 from telebot.states.sync.middleware import StateMiddleware
 
 #? engine
-from bot_engine.enums.User import *
+from bot_engine.data.Users import *
 
 
 #? modules

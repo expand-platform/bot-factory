@@ -10,7 +10,7 @@ from api.api_clients import API_CLIENTS
 
 #? bot engine
 from bot_engine.handlers.Handlers import Handlers
-from bot_engine.enums.User import AccessLevel
+from bot_engine.data.Users import AccessLevel
 from bot_engine.enums.Generator import *
 
 #? constants

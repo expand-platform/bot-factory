@@ -3,7 +3,7 @@ from telebot.custom_filters import AdvancedCustomFilter
 from telebot.types import Message, CallbackQuery
 
 #? bot engine
-from bot_engine.enums.User import *
+from bot_engine.data.Users import *
 
 # ? engine types
 if TYPE_CHECKING:
@@ -11,7 +11,6 @@ if TYPE_CHECKING:
     from bot_engine.languages.Languages import Languages
 
 
-#! для смены языка глобально можно каждый раз на этапе filter проверять активный язык юзера
 class AccessLevelFilter(AdvancedCustomFilter):
     key = "access_level"
 
@@ -31,11 +30,12 @@ class AccessLevelFilter(AdvancedCustomFilter):
         else: 
             active_user = self.database.get_active_user(message)
 
-        user_access_level = active_user.access_level.value
+        user_access_level = active_user.access_level
 
+        #? Смена языка пользователя
         self.languages.set_active_language(active_user.language)
 
-        access_level_values = [level.value for level in access_level]
+        access_level_values = [level for level in access_level]
         return user_access_level in access_level_values
 
 

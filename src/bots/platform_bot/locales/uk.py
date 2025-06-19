@@ -4,7 +4,7 @@ from telebot.types import BotCommand
 from bot_engine.languages.Locale import Locale
 
 #? constats
-from bots.platform_bot.config.commands import BOT_COMMANDS
+from bots.platform_bot.config.BotCommands import BOT_COMMANDS
 
 UK_LOCALE = Locale(
     language_name="uk",

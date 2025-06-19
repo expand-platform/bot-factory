@@ -10,6 +10,7 @@ BOT_TOKEN: str = dotenv.get("BOT_TOKEN") or ""
 #? configs
 ENVIRONMENT: str = dotenv.get("ENVIRONMENT") or "DEVELOPMENT" 
 PORT: int = dotenv.get_int("PORT") or 8000
+DEFAULT_LANGUAGE = dotenv.get("DEFAULT_LANGUAGE") or "ru" 
 
 #? DB
 DATABASE_TOKEN: str = dotenv.get("DATABASE_TOKEN") or "" 

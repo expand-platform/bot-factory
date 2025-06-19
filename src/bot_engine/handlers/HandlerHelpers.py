@@ -22,7 +22,7 @@ class HandlerHelpers:
 
     def make_safe_variables(self, format_variables: dict[str, str | int] ) -> dict[str, str | int]:
         for key, value in format_variables.items():
-            if "_" in value:
+            if value and "_" in value:
                 format_variables[key] = value.replace("_", "\\_")
 
         return format_variables

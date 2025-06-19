@@ -1,15 +1,22 @@
 from dataclasses import dataclass, asdict
 from typing import Optional, Any
-from telebot.types import Message
 from datetime import datetime
 
-#? configs
-from bots.trading_bot.config.langConfig import DEFAULT_LANGUAGE
+# ? telebot
+from telebot.types import Message
+
+# ? configs
+from config.env import ADMIN_IDS, DEFAULT_LANGUAGE, SUPER_ADMIN_ID
+
+# ? data
+from bot_engine.data.Users import AccessLevel
 
 # ? engine
 from bot_engine.languages.Languages import Languages
-from bot_engine.enums.User import AccessLevel, CreateMethod
 
+
+#! Нужно придумать систему, которая будет создавать разные типы
+#! И систему, которая будет обновлять username раз в сутки / раз в неделю исходя из даты profile_update (чтобы не при каждом хендлере)
 
 
 @dataclass
@@ -20,52 +27,76 @@ class User:
     user_id: int
     chat_id: int
 
-    access_level: AccessLevel
+    access_level: str
 
-    language: str 
-    joined_at: str
+    language: str
+    joined: str
+    profile_updated: str
+
+    is_premium: bool
 
     def to_dict(self):
         dict = asdict(self)
-        dict["access_level"] = self.access_level.value
         return dict
 
 
 @dataclass
 class NewUser:
     """creates user from it's message data or from database"""
-    access_level: AccessLevel = AccessLevel.USER
+    access_level: str = AccessLevel.USER
 
-    def create_user_from_database(self, user) -> User:
-        return User(
-            first_name=user["first_name"],
-            username=user["username"],
-            
-            user_id=user["user_id"],
-            chat_id=user["chat_id"],
-            
-            access_level=self.access_level,
-            
-            language=DEFAULT_LANGUAGE,
-            joined_at=datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
-        )
-    
 
-    def create_user_from_message(self, message: Message) -> User:
-        """ creates user from message data"""
+    def create_user(
+        self,
+        message: Optional[Message] = None,
+        database_user: Optional[dict[str, str | int | bool]] = None,
+    ):
+        """crafts user data depending on given source of data"""
+        first_name = user_id = chat_id = username = None
+        joined = profile_updated = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        language = DEFAULT_LANGUAGE
+        access_level = self.access_level
+        is_premium = False
+
+        if message:
+            first_name = message.from_user.first_name
+            username = message.from_user.username
+
+            user_id = message.from_user.id
+            chat_id = message.chat.id
+
+        elif database_user:
+            first_name = database_user["first_name"]
+            username = database_user["username"]
+
+            user_id = database_user["user_id"]
+            chat_id = database_user["chat_id"]
+
+
+        if user_id == SUPER_ADMIN_ID:
+            access_level, is_premium = self.make_admin(access_level=AccessLevel.SUPER_ADMIN)
+
+        elif user_id in ADMIN_IDS:
+            access_level, is_premium = self.make_admin(access_level=AccessLevel.ADMIN)
+
+
         return User(
-            first_name=message.from_user.first_name,
-            username=message.from_user.username,
-            
-            user_id=message.from_user.id,
-            chat_id=message.chat.id,
-            
-            access_level=self.access_level,
-            
-            language=DEFAULT_LANGUAGE,
-            joined_at=datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
+            first_name=first_name,
+            username=username or None,
+            user_id=user_id,
+            chat_id=chat_id,
+            access_level=access_level,
+            language=language,
+            joined=joined,
+            profile_updated=profile_updated,
+            is_premium=is_premium,
         )
-    
+
+
+    def make_admin(self, access_level: str = AccessLevel.SUPER_ADMIN) -> list[str | bool]:
+        """set access level and premium privileges"""
+        is_premium = True
+        return [access_level, is_premium]
 
 
 @dataclass

@@ -1,7 +1,7 @@
 from telebot.types import Message
 from telebot.custom_filters import AdvancedCustomFilter
 
-from bot_engine.enums.User import *
+from bot_engine.data.Users import *
 from bots.sport_home_bot.database.mongodb import Database
 
 access_level_key = "access_level"
