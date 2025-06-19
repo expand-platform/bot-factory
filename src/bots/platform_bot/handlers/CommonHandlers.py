@@ -15,7 +15,7 @@ from bot_engine.enums.Generator import *
 
 #? constants
 from bots.platform_bot.config.BotCommands import BOT_COMMANDS
-from bots.platform_bot.config.Buttons import BOT_BUTTONS
+from bots.platform_bot.config.BotButtons import BOT_BUTTONS
 
 #? enums
 from bots.platform_bot.handlers.BotHandlers import BotHandlers
