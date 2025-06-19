@@ -1,0 +1,6 @@
+DATABASE_NAME = "referral-bot"
+DATABASE_CONNECTIONS_LIMIT=1
+
+USER_COLLECTION = "users"
+
+REPLICA_NAME="referral-bot-replica"

@@ -76,12 +76,5 @@ RU_LOCALE = Locale(
             
             f"*Цены и контакты*\n\n🌓 Если ты ищешь учителя / наставника, тебе в /{BOT_COMMANDS.prices}\n\n💁‍♂️ Если нужна личная помощь, я тут: /{BOT_COMMANDS.ask}",
         ],
-        
-
-        #? ADMIN
-        #? User Actions
-        USER_ACTIONS.SLASH_COMMAND: [
-            "{first_name} @{username} перешёл в /{slash_command}",
-        ]
     }
 )

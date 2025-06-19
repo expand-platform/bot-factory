@@ -20,8 +20,10 @@ class Bots:
         
         elif self.active_bot == BOT_LIST.SPORT_HOME_BOT:
             from bots.sport_home_bot import main
+        
+        elif self.active_bot == BOT_LIST.REFERRAL_BOT:
+            from bots.referral_bot import main
 
         else:
-            raise Exception("❌ Active bot isn't choose, please double-check the .env file")
-            pass
+            raise Exception("❌ Active bot isn't choose, please double-check 'ACTIVE_BOT' in .env file")
         

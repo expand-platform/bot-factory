@@ -85,12 +85,14 @@ class Handlers:
             self.bot._send_message(chat_id=message.chat.id, messages=messages)
             
             if message.chat.id != SUPER_ADMIN_ID:  
+                notification = "{first_name} @{username} перешёл в /{slash_command} в боте @{bot_username}"
                 self._Helpers.notify_super_admin(
-                    message=self._messages[USER_ACTIONS.SLASH_COMMAND],
+                    message=notification,
                     format_variables={
                         "first_name": message.from_user.first_name,
                         "username": message.from_user.username,
                         "slash_command": command,
+                        "bot_username": self.bot.get_bot_data("username")
                     },
                 )
 
