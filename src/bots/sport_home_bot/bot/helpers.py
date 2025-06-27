@@ -6,7 +6,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from telebot import TeleBot
 from telebot.types import Message
 
-from bots.sport_home_bot.database.mongodb import Database
+from bots.sport_home_bot.database.mongodb import Database, DB_COLLECTIONS, STATS_DOCUMENT
 from bots.sport_home_bot.bot.messages import messages
 from bots.sport_home_bot.parser.zelart_parser import PrestaShopScraper
 from bots.sport_home_bot.bot.dataclass import FIELDS
@@ -100,14 +100,20 @@ class Helpers:
                     reply_string += messages.scheduler_parse_string_add.format(key, key_value_database, key_value_parser)
                     self.db.update("url", link, product_key, product_from_parser[product_key])
 
-
+        
         if product_change_status:
             print(f"➕ product has changed")
+            self.increase_products_tracked()
             self.notify_users(reply_string)
         else:
             print(f"➖ product has not changed")
         
         return product_change_status
+
+
+    def increase_products_tracked(self) -> None:
+        products_tracked = self.db.get_products_tracked_stats()
+        self.db.update_one_document(collection_name=DB_COLLECTIONS.stats, key=STATS_DOCUMENT.products_tracked, value=products_tracked+1)
 
 
     def _notify_final_status(self, all_products_change_status: bool) -> None:
@@ -141,7 +147,7 @@ class Helpers:
 
     def save_time(self, time: list[int]):
         """ saves time to DB """
-        self.db.update_config(key="parse_time", new_value=time)
+        self.db.update_one_document(key="parse_time", value=time)
 
 
     def format_minutes(self, minutes: int) -> str:
@@ -165,7 +171,8 @@ class Helpers:
     def get_info(self, message: Message):
         products_count = self.db.get_products_count()
         parse_time = self.get_parse_time()
+        products_tracked = self.db.get_products_tracked_stats()
         
-        info_message = messages.info_string.format(products_count, parse_time)
+        info_message = messages.info_string.format(products_count, parse_time, products_tracked)
 
         self.bot.send_message(message.chat.id, info_message)

@@ -74,7 +74,7 @@ class Handlers:
         self,
         messages: str | list[str],
         command: str,
-        access_level: list[AccessLevel] = [
+        access_level: list[str] = [
             AccessLevel.USER,
             AccessLevel.ADMIN,
             AccessLevel.SUPER_ADMIN,

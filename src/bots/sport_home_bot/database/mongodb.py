@@ -11,7 +11,7 @@ from bots.sport_home_bot.config.Config import BOT_CONFIGS
 
 @dataclass
 class ConfigDocument:
-    id: str = "_id"
+    _id: str = "_id"
     parse_time: str = "parse_time"
 
 @dataclass
@@ -19,8 +19,23 @@ class ProductDocument:
     _id: str = "_id"
     id: str = "id"
 
-config_document = ConfigDocument()
-product_document = ProductDocument()
+
+@dataclass
+class StatisticsDocument:
+    _id: str = "_id"
+    products_tracked: str = "products_tracked"
+
+@dataclass
+class Collections:
+    config: str = "config"
+    stats: str = "stats"
+
+
+CONFIG_DOCUMENT = ConfigDocument()
+PRODUCT_DOCUMENT = ProductDocument()
+STATS_DOCUMENT = StatisticsDocument()
+
+DB_COLLECTIONS = Collections()
 
 
 #! We'll need to use bot_engine Database & MongoDB classes later
@@ -30,7 +45,15 @@ class Database():
         self.db = self.client[BOT_CONFIGS.database_name]
         self.users_collection = self.db[BOT_CONFIGS.users_collection]
         self.products_collection = self.db[BOT_CONFIGS.products_collection]
-        self.config_collection = self.db["config"]
+        
+        """ collections """
+        self.config_collection = self.db[DB_COLLECTIONS.config]
+        self.stats_collection = self.db[DB_COLLECTIONS.stats]
+
+        
+    def get(self, key: str, collection_name: str = DB_COLLECTIONS.config) -> list[dict]:
+        """ returns list of documents from given collection """
+        return list(self.db[collection_name].find({}))
 
 
     def insert_product(self, product: Dict[str, Any]) -> None:
@@ -54,8 +77,6 @@ class Database():
             print(f"An error occurred: {e}")
             return []
 
-    def get_products_count(self) -> int:
-        return len(self.get_products())
 
 
     def insert_user(self, user: Dict[str, Any]) -> None:
@@ -96,22 +117,24 @@ class Database():
             print(f"Updated {field_name} to {new_value} for {key}: {value}")
         except Exception as e:
             print(f"An error occurred: {e}")
-
-
-    def update_config(self, key: str = "", new_value: Union[str, int, bool] = "") -> None:
-        document = self.config_collection.find_one({})
+    
+     
+    def update_one_document(self, collection_name: str = "config", key: str = "", value: Union[str, int, bool] = "") -> None:
+        """ updates one document in collection """
+            
+        document: dict = self.db[collection_name].find_one({})
 
         if document:
-            document_id = document[config_document.id]
+            document_id = document[CONFIG_DOCUMENT._id]
         else:
             print(f"🔴 No config document found!")
             return
         
-        update_data = {'$set': {key: new_value}}
-        result = self.config_collection.update_one({'_id': ObjectId(document_id)}, update_data)
+        update_data = {'$set': {key: value}}
+        result = self.db[collection_name].update_one({'_id': ObjectId(document_id)}, update_data)
         
         if result.modified_count > 0:
-            print(f"🟢 Config updated: {key}:{new_value}")
+            print(f"🟢 Config updated: {key}:{value}")
 
         elif result.matched_count > 0:
             print("🟡 Nothing new in config")
@@ -128,12 +151,12 @@ class Database():
         if document is None:
             #? set default time
             document = {
-                config_document.parse_time: parse_time
+                CONFIG_DOCUMENT.parse_time: parse_time
             }
             self.config_collection.insert_one(document)
 
         else:
-            parse_time = document[config_document.parse_time]
+            parse_time = document[CONFIG_DOCUMENT.parse_time]
 
             #? set default time
             for time in parse_time:
@@ -143,12 +166,23 @@ class Database():
         return parse_time
         
 
+    #? REMOVALS
     def remove_product(self, id: int) -> None:
-        document = self.products_collection.delete_one({product_document.id: id})
+        document = self.products_collection.delete_one({PRODUCT_DOCUMENT.id: id})
 
         if document:
             print(f"🟢 product {id} deleted from DB!")
         else:
             print(f"🟡 Product with {id} not found in DB!")
+            
+            
+    
+    #? STATS    
+    def get_products_count(self) -> int:
+        return len(self.get_products())
+    
+    def get_products_tracked_stats(self) -> int:
+        document = self.stats_collection.find_one({})
+        return document[STATS_DOCUMENT.products_tracked]       
 
 
