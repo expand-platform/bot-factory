@@ -13,7 +13,8 @@ from bots.sport_home_bot.bot.dataclass import FIELDS
 
 from data.constants import ENVIRONMENT
 
-SLEEP_TIME = 1.2  # seconds
+SLEEP_TIME = 1.2  
+
 
 class Helpers:
     def __init__(self, bot: TeleBot, database: Database, scheduler: BackgroundScheduler):
@@ -167,12 +168,20 @@ class Helpers:
         minutes = self.format_minutes(minutes)
         return f"{hours}:{minutes}"
     
+    def count_cost_of_work(self) -> int:
+        COST_OF_WORK = 100 # uah
+        products_tracked = self.db.get_products_tracked_stats()
+        hours_of_work = products_tracked // 2
+        return hours_of_work * COST_OF_WORK
+    
 
     def get_info(self, message: Message):
         products_count = self.db.get_products_count()
         parse_time = self.get_parse_time()
         products_tracked = self.db.get_products_tracked_stats()
         
-        info_message = messages.info_string.format(products_count, parse_time, products_tracked)
+        cost_of_work = self.count_cost_of_work()
+        
+        info_message = messages.info_string.format(products_count, parse_time, products_tracked, cost_of_work)
 
-        self.bot.send_message(message.chat.id, info_message)
+        self.bot.send_message(message.chat.id, info_message, parse_mode="Markdown")
